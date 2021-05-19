@@ -109,3 +109,7 @@ dist
 # secrets
 *token.json
 *config.json
+
+# local data
+data/*
+.firebase
