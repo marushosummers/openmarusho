@@ -104,8 +104,8 @@ dist
 .tern-port
 
 # output files
-output.json
+*output.json
 
 # secrets
-token.json
-config.json
+*token.json
+*config.json
