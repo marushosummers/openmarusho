@@ -1,11 +1,15 @@
 //"use strict";
 
 const functions = require("firebase-functions");
-const admin = require('firebase-admin')
-admin.initializeApp(functions.config().firebase)
+const admin = require('firebase-admin');
+admin.initializeApp(functions.config().firebase);
 
 // データベースの参照を作成
 var fireStore = admin.firestore()
+fireStore.settings({
+	host: "localhost:8080",
+	ssl: false,
+});
 
 const request = require("request");
 
@@ -77,10 +81,10 @@ exports.refresh = functions.https.onRequest((req, res) => {
                     res.send("REFRESH!")
                 }).catch((error) => {
                     console.error("Error adding document: ", error);
+                    res.send("REFRESH?");
                 });
                 }
                 });
         };
   });
-  res.send("REFRESH?")
 });

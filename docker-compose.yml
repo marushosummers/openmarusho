@@ -6,6 +6,7 @@ services:
     ports:
       - 9099:9099 # Auth
       - 4000:4000 # Emulator Suite UI
+      - 5000:5000 # Cloud Hosting
       - 5001:5001 # Cloud Functions
       - 8080:8080 # Cloud Firestore
     tty: true
