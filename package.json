@@ -8,9 +8,7 @@
     "start": "nodemon index.js"
   },
   "dependencies": {
-    "express": "^4.17.1",
-    "firebase-tools": "^9.11.0",
-    "nodemon": "^2.0.7",
-    "request": "^2.88.2"
+    "firebase": "^8.6.1",
+    "firebase-tools": "^9.11.0"
   }
 }

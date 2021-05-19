@@ -4,10 +4,13 @@ services:
   node:
     build: .
     ports:
-      - "3000:3000"
+      - 9099:9099 # Auth
+      - 4000:4000 # Emulator Suite UI
+      - 5001:5001 # Cloud Functions
+      - 8080:8080 # Cloud Firestore
     tty: true
     stdin_open: true
     volumes:
-      - "./:/usr/src/app"
+      - ./:/usr/src/app
     command:
-      npm run start
+      bash -c 'yarn && cd functions && yarn && /bin/bash'
