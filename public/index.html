@@ -1,89 +1,120 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Welcome to Firebase Hosting</title>
+ 
+<head>
+  <meta charset="UTF-8">
+  <title>LineChartサンプル</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.js"></script>
+</head>
+ 
+<body>
+<!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
 
-    <!-- update the version number as needed -->
-    <script defer src="/__/firebase/8.6.1/firebase-app.js"></script>
-    <!-- include only the Firebase features as you need -->
-    <script defer src="/__/firebase/8.6.1/firebase-auth.js"></script>
-    <script defer src="/__/firebase/8.6.1/firebase-database.js"></script>
-    <script defer src="/__/firebase/8.6.1/firebase-firestore.js"></script>
-    <script defer src="/__/firebase/8.6.1/firebase-functions.js"></script>
-    <script defer src="/__/firebase/8.6.1/firebase-messaging.js"></script>
-    <script defer src="/__/firebase/8.6.1/firebase-storage.js"></script>
-    <script defer src="/__/firebase/8.6.1/firebase-analytics.js"></script>
-    <script defer src="/__/firebase/8.6.1/firebase-remote-config.js"></script>
-    <script defer src="/__/firebase/8.6.1/firebase-performance.js"></script>
-    <!-- 
-      initialize the SDK after all desired features are loaded, set useEmulator to false
-      to avoid connecting the SDK to running emulators.
-    -->
-    <script defer src="/__/firebase/init.js?useEmulator=true"></script>
+<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+<script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-analytics.js"></script>
 
-    <style media="screen">
-      body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
-      #message { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; }
-      #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
-      #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
-      #message p { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
-      #message a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
-      #message, #message a { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
-      #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
-      @media (max-width: 600px) {
-        body, #message { margin-top: 0; background: white; box-shadow: none; }
-        body { border-top: 16px solid #ffa100; }
-      }
-    </style>
-  </head>
-  <body>
-    <div id="message">
-      <h2>Welcome</h2>
-      <h1>Firebase Hosting Setup Complete</h1>
-      <p>You're seeing this because you've successfully setup Firebase Hosting. Now it's time to go build something extraordinary!</p>
-      <a target="_blank" href="https://firebase.google.com/docs/hosting/">Open Hosting Documentation</a>
-    </div>
-    <p id="load">Firebase SDK Loading&hellip;</p>
+<script>
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  var firebaseConfig = {
+    apiKey: "AIzaSyCA2Gi83b2KVKcrf5GCdQ4ZIomUSJMYsI8",
+    authDomain: "open-marusho.firebaseapp.com",
+    projectId: "open-marusho",
+    storageBucket: "open-marusho.appspot.com",
+    messagingSenderId: "76478453915",
+    appId: "1:76478453915:web:78906e53f4b4d9069c8e3e",
+    measurementId: "G-WNTBVPMBPE"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  firebase.analytics();
+</script>
 
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const loadEl = document.querySelector('#load');
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-        // // The Firebase SDK is initialized and available here!
-        //
-        // firebase.auth().onAuthStateChanged(user => { });
-        // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
-        // firebase.firestore().doc('/foo/bar').get().then(() => { });
-        // firebase.functions().httpsCallable('yourFunction')().then(() => { });
-        // firebase.messaging().requestPermission().then(() => { });
-        // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
-        // firebase.analytics(); // call to activate
-        // firebase.analytics().logEvent('tutorial_completed');
-        // firebase.performance(); // call to activate
-        //
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+  <h1>Weight</h1>
+  <div class="chart-container" style="position: relative; width: 800px;">
+    <canvas id="myLineChart"></canvas>
+  </div>
+  <div>
+    <script type="text/javascript">
 
-        try {
-          let app = firebase.app();
-          let features = [
-            'auth', 
-            'database', 
-            'firestore',
-            'functions',
-            'messaging', 
-            'storage', 
-            'analytics', 
-            'remoteConfig',
-            'performance',
-          ].filter(feature => typeof app[feature] === 'function');
-          loadEl.textContent = `Firebase SDK loaded with ${features.join(', ')}`;
-        } catch (e) {
-          console.error(e);
-          loadEl.textContent = 'Error loading the Firebase SDK, check the console.';
-        }
-      });
+      var db = firebase.firestore();
+      var dataT = [];
+      var dataH = [];
+      var timestamp = [];
+      var strtime = [];
+      function readfirestore() {
+
+        db.collection("weight")
+          .orderBy("date", "desc")
+          .limit(30)
+          .get().then((querySnapshot) => {
+            querySnapshot.forEach((doc) => {
+              dataT.push(Math.round(doc.data().value * (10 ** doc.data().unit) * 10)/10);
+              // dataH.push(doc.data().humidity);
+              timestamp.push(doc.data().date);
+            });
+
+            //unixtime to string
+            for (let i = 0; i < timestamp.length; i++) {
+              let dateTime = new Date(timestamp[i] * 1000);
+              console.log(dateTime)
+              strtime.push(dateTime.toLocaleString());
+            }
+            viewChart();
+          }
+          )
+      };
+
+       function viewChart() {
+        var ctx = document.getElementById("myLineChart");
+        var myLineChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: strtime.reverse(),
+            datasets: [
+              {
+                label: 'Weight',
+                data: dataT.reverse(),
+                borderColor: "#ffa100",
+                backgroundColor: "rgba(0,0,0,0)"
+              }
+            ],
+          },
+          options: {
+            title: {
+              display: false,
+              text: '体重'
+            },
+            scales: {
+              xAxes: [{
+              type: 'time',
+              time: {
+                unit: 'day'
+              }
+            }],
+              yAxes: [{
+                ticks: {
+                  suggestedMax: 56,
+                  suggestedMin: 50,
+                  stepSize: 1,
+                  callback: function (value, index, values) {
+                    return value + ''
+                  }
+                }
+              }]
+            },
+          }
+        });
+      };
+ 
+    readfirestore();
+ 
     </script>
-  </body>
+ 
+  </div>
+</body>
+ 
 </html>
