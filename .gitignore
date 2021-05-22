@@ -112,4 +112,5 @@ dist
 
 # local data
 data/*
+data-path/*
 .firebase

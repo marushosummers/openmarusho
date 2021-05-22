@@ -14,82 +14,157 @@ var fireStore = admin.firestore()
 // });
 
 const request = require("request");
+const { fetchWeight, fetchHR, fetchActivity } = require("./fetch.js");
 
-exports.weight = functions.pubsub.schedule("every 5 minutes").onRun((context) => {
-		functions.logger.info("fetchWeight", { structuredData: true });
-		const currentTokenRef = fireStore
+async function readToken(){
+    const snapShot = await fireStore
 			.collection("token")
 			.orderBy("createdAt", "desc")
-			.limit(1);
-		const lastupdateRef = fireStore
+			.limit(1)
+			.get();
+
+		return snapShot.docs[0].data();
+};
+
+async function readLastWeightUpdate(){
+		const snapShot = await fireStore
 			.collection("weight")
 			.orderBy("created", "desc")
-			.limit(1);
+			.limit(1)
+			.get();
+		return snapShot.docs[0].data();
+};
 
-		// access tokenとlastupdateで新しいデータを取得
-		currentTokenRef.get().then((currentTokens) => {
-			currentTokens.forEach((token) => {
-				lastupdateRef.get().then((lastupdates) => {
-					lastupdates.forEach((lastupdate) => {
-						// functions.logger.info(token, {structuredData: true});
-						if (!token.exists) {
-							return "No such document!";
-						} else {
-							// access_tokenの設定
-							let options = {
-								method: "GET",
-								url: "https://wbsapi.withings.net/measure",
-								qs: {
-									action: "getmeas",
-									meastype: 1,
-									cateegory: 1,
-									access_token: token.data().access_token,
-									lastupdate: lastupdate.data().created + 1,
-								},
-								headers: {},
-								json: true,
-							};
-							functions.logger.info(options, { structuredData: true });
+async function readLastHRUpdate(){
+		const snapShot = await fireStore
+			.collection("heart_rate")
+			.orderBy("created", "desc")
+			.limit(1)
+			.get();
+		return snapShot.docs[0].data();
+};
 
-							// 体重データの取得
-							request(options, function (error, response) {
-								if (error) throw new Error(error);
+async function fetchData() {
+	// currentAccessToken
+	const currentToken = await readToken();
+	if (!currentToken) {
+		return "No Token";
+	}
 
-								// データを取得できたら保存
-								if (response.statusCode == 200) {
-									functions.logger.info(response.body, {
-										structuredData: true,
-									});
-									// firestoreへの保存
-									response.body.body.measuregrps.forEach((grp) => {
-										fireStore
-											.collection("weight")
-											.doc(Number(grp.grpid).toString())
-											.set({
-												attrib: grp.attrib,
-												date: grp.date,
-												created: grp.created,
-												category: grp.category,
-												value: grp.measures[0].value,
-												type: grp.measures[0].type,
-												unit: grp.measures[0].unit,
-												createdAt: admin.firestore.FieldValue.serverTimestamp(),
-											})
-											.then((newData) => {
-												console.log("Document written with ID: ", newData.id);
-											})
-											.catch((error) => {
-												console.error("Error adding document: ", error);
-											});
-									});
-								}
-							});
-						}
-					});
+	// ##############################
+	// // Weight
+	// #############################
+	const lastWeightUpdated = await readLastWeightUpdate();
+	const wResponse = await fetchWeight(currentToken, lastWeightUpdated);
+
+	// データを取得できたら保存
+	if (wResponse.statusCode == 200) {
+		// firestoreへの保存
+		const wgh = JSON.parse(wResponse.body).body.measuregrps;
+		wgh.forEach((grp) => {
+			fireStore
+				.collection("weight")
+				.doc(Number(grp.grpid).toString())
+				.set({
+					attrib: grp.attrib,
+					date: grp.date,
+					created: grp.created,
+					category: grp.category,
+					value: grp.measures[0].value,
+					type: grp.measures[0].type,
+					unit: grp.measures[0].unit,
+					createdAt: admin.firestore.FieldValue.serverTimestamp(),
+				})
+				.then((newData) => {
+					console.log("Document written with ID: ", newData);
+				})
+				.catch((error) => {
+					console.error("Error adding document: ", error);
 				});
-			});
 		});
-    return null;
+	}
+
+	// ##############################
+	// // HR
+	// #############################
+	const lastHRUpdated = await readLastHRUpdate();
+	const hResponse = await fetchHR(currentToken, lastHRUpdated);
+
+	// データを取得できたら保存
+	if (hResponse.statusCode == 200) {
+		// firestoreへの保存
+		const hrs = JSON.parse(hResponse.body).body.series;
+		Object.keys(hrs).forEach((key) => {
+			fireStore
+				.collection("heart_rate")
+				.doc(key)
+				.set({
+					value: hrs[key].heart_rate,
+					created: Number(key),
+					model: hrs[key].model,
+					model_id: hrs[key].model_id,
+					deviceid: hrs[key].deviceid,
+					createdAt: admin.firestore.FieldValue.serverTimestamp(),
+				})
+				.then((newData) => {
+					console.log("Document written with ID: ", newData);
+				})
+				.catch((error) => {
+					console.error("Error adding document: ", error);
+				});
+		});
+	}
+
+	// ##############################
+	// // Activity
+	// #############################
+	// 1日前からの更新を取得
+	const lastActivityUpdated = Math.floor(Date.now() / 1000 - 60 * 60 * 24 * 1);
+	functions.logger.info(lastActivityUpdated, { structuredData: true });
+	const aResponse = await fetchActivity(currentToken, lastActivityUpdated);
+
+	// データを取得できたら保存
+	if (hResponse.statusCode == 200) {
+		// firestoreへの保存
+		const acs = JSON.parse(aResponse.body).body.activities;
+		acs.forEach((act) => {
+			fireStore
+				.collection("activity")
+				.doc(act.date)
+				.set({
+					steps: act.steps,
+					distance: act.distance,
+					calories: act.calories,
+					totalcalories: act.totalcalories,
+					hr_average: act.hr_average,
+					date: act.date,
+					createdAt: admin.firestore.FieldValue.serverTimestamp(),
+				})
+				.then((newData) => {
+					console.log("Document written with ID: ", newData);
+				})
+				.catch((error) => {
+					console.error("Error adding document: ", error);
+				});
+		});
+	}
+};
+
+// ##############################
+// // Scheduler
+
+// ローカルでの挙動確認時はHTTP Requestを叩く
+//exports.date = functions.https.onRequest((req, res) => {
+
+exports.fetch = functions.pubsub.schedule("every 5 minutes").onRun((context) => {
+		functions.logger.info("fetchData", { structuredData: true });
+		fetchData()
+			.then(() => {
+				return null;
+			})
+			.catch((err) => {
+				console.log(err);
+			});
 	});
 
 exports.refresh = functions.pubsub.schedule("every 90 minutes").onRun((context) => {
