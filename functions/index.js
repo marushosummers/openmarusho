@@ -156,7 +156,7 @@ async function fetchData() {
 // ローカルでの挙動確認時はHTTP Requestを叩く
 //exports.date = functions.https.onRequest((req, res) => {
 
-exports.fetch = functions.pubsub.schedule("every 5 minutes").onRun((context) => {
+exports.fetch = functions.pubsub.schedule("every 30 minutes").onRun((context) => {
 		functions.logger.info("fetchData", { structuredData: true });
 		fetchData()
 			.then(() => {
