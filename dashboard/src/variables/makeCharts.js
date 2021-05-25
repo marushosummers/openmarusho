@@ -277,7 +277,7 @@ const makeActivityChart = (dbData) => {
       axisX: {
         showGrid: false,
         labelInterpolationFnc: function (value) {
-          return moment(value).format("MMM D");
+          return moment(value).format("D");
         },
         high: Date.now(),
       },
@@ -285,7 +285,7 @@ const makeActivityChart = (dbData) => {
       high: maxValue + 400,
       chartPadding: {
         top: 0,
-        right: 5,
+        right: 0,
         bottom: 0,
         left: 0,
       },
@@ -295,11 +295,6 @@ const makeActivityChart = (dbData) => {
         "screen and (max-width: 640px)",
         {
           seriesBarDistance: 5,
-          axisX: {
-            labelInterpolationFnc: function (value) {
-              return value[0];
-            },
-          },
         },
       ],
     ],
