@@ -33,7 +33,10 @@ export default function AdminNavbarLinks() {
         aria-label="GitHub"
         className={classes.buttonLink}
       >
-        <a href="https://github.com/marushosummers" className={classes.icons}>
+        <a
+          href="https://github.com/marushosummers/openmarusho"
+          className={classes.icons}
+        >
           <GitHubIcon className={classes.icons} />
         </a>
       </Button>
