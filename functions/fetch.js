@@ -33,7 +33,7 @@ exports.fetchHR = async (Token, lastUpdate) => {
 		json: {
 			action: "getintradayactivity",
 			data_fields: "heart_rate",
-			startdate: lastUpdate.created + 1,
+			startdate: lastUpdate + 1,
 		},
 	});
 

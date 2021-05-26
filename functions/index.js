@@ -87,7 +87,10 @@ async function fetchData() {
 	// ##############################
 	// // HR
 	// #############################
-	const lastHRUpdated = await readLastHRUpdate();
+
+	// NOTE: 大量のデータが帰ってくると、firestoreの書き込み時エラーになる
+	//const lastHRUpdated = await readLastHRUpdate();
+	const lastHRUpdated = Math.floor(Date.now() / 1000 - 60 * 60 * 3)
 	const hResponse = await fetchHR(currentToken, lastHRUpdated);
 
 	// データを取得できたら保存
