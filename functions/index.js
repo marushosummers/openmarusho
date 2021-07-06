@@ -44,6 +44,10 @@ async function readLastHRUpdate(){
 		return snapShot.docs[0].data();
 };
 
+// ##############################
+// // FetchData
+// #############################
+
 async function fetchData() {
 	// currentAccessToken
 	const currentToken = await readToken();
@@ -154,24 +158,10 @@ async function fetchData() {
 };
 
 // ##############################
-// // Scheduler
+// // refreshToken
+// #############################
 
-// ローカルでの挙動確認時はHTTP Requestを叩く
-//exports.date = functions.https.onRequest((req, res) => {
-
-exports.fetch = functions.pubsub.schedule("every 30 minutes").onRun((context) => {
-		functions.logger.info("fetchData", { structuredData: true });
-		fetchData()
-			.then(() => {
-				return null;
-			})
-			.catch((err) => {
-				console.log(err);
-			});
-	});
-
-exports.refresh = functions.pubsub.schedule("every 90 minutes").onRun((context) => {
-		functions.logger.info("refreshAccessToken", { structuredData: true });
+async function refreshToken(){
 		const currentToken = fireStore
 			.collection("token")
 			.orderBy("createdAt", "desc")
@@ -224,4 +214,32 @@ exports.refresh = functions.pubsub.schedule("every 90 minutes").onRun((context) 
 			});
 		});
 		return null;
+};
+
+// ##############################
+// // Scheduler
+
+// ローカルでの挙動確認時はHTTP Requestを叩く
+//exports.date = functions.https.onRequest((req, res) => {
+
+exports.fetch = functions.pubsub.schedule("every 30 minutes").onRun((context) => {
+		functions.logger.info("fetchData", { structuredData: true });
+		fetchData()
+			.then(() => {
+				return null;
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	});
+
+exports.refresh = functions.pubsub.schedule("every 90 minutes").onRun((context) => {
+		functions.logger.info("refreshAccessToken", { structuredData: true });
+		refreshToken()
+			.then(() => {
+				return "OK";
+			})
+			.catch((err) => {
+				console.log(err);
+			});
 	});
