@@ -16,9 +16,9 @@ var fireStore = admin.firestore()
 const request = require("request");
 const { fetchWeight, fetchHR, fetchActivity } = require("./fetch.js");
 
-async function readToken(){
+async function readToken(tokenName){
     const snapShot = await fireStore
-			.collection("token")
+			.collection(tokenName)
 			.orderBy("createdAt", "desc")
 			.limit(1)
 			.get();
@@ -26,9 +26,9 @@ async function readToken(){
 		return snapShot.docs[0].data();
 };
 
-async function readLastWeightUpdate(){
+async function readLastWeightUpdate(weightName){
 		const snapShot = await fireStore
-			.collection("weight")
+			.collection(weightName)
 			.orderBy("created", "desc")
 			.limit(1)
 			.get();
@@ -50,7 +50,12 @@ async function readLastHRUpdate(){
 
 async function fetchData() {
 	// currentAccessToken
-	const currentToken = await readToken();
+
+	// ##############################
+	// // my data
+	// #############################
+
+	const currentToken = await readToken("token");
 	if (!currentToken) {
 		return "No Token";
 	}
@@ -58,7 +63,7 @@ async function fetchData() {
 	// ##############################
 	// // Weight
 	// #############################
-	const lastWeightUpdated = await readLastWeightUpdate();
+	const lastWeightUpdated = await readLastWeightUpdate("weight");
 	const wResponse = await fetchWeight(currentToken, lastWeightUpdated);
 
 	// データを取得できたら保存
@@ -94,7 +99,7 @@ async function fetchData() {
 
 	// NOTE: 大量のデータが帰ってくると、firestoreの書き込み時エラーになる
 	//const lastHRUpdated = await readLastHRUpdate();
-	const lastHRUpdated = Math.floor(Date.now() / 1000 - 60 * 60 * 3)
+	const lastHRUpdated = Math.floor(Date.now() / 1000 - 60 * 60 * 3);
 	const hResponse = await fetchHR(currentToken, lastHRUpdated);
 
 	// データを取得できたら保存
@@ -155,15 +160,65 @@ async function fetchData() {
 				});
 		});
 	}
+
+	// ##############################
+	// // friend data
+	// #############################
+	// TODO: 関数集約
+
+	const dCurrentToken = await readToken("d-token");
+	if (!dCurrentToken) {
+		return "No Token";
+	}
+
+	// ##############################
+	// // d-weight
+	// #############################
+	const dLastWeightUpdated = await readLastWeightUpdate("d-weight");
+	const dwResponse = await fetchWeight(dCurrentToken, dLastWeightUpdated);
+
+	// データを取得できたら保存
+	if (dwResponse.statusCode == 200) {
+		// firestoreへの保存
+		const dwgh = JSON.parse(dwResponse.body).body.measuregrps;
+		dwgh.forEach((grp) => {
+			fireStore
+				.collection("d-weight")
+				.doc(Number(grp.grpid).toString())
+				.set({
+					attrib: grp.attrib,
+					date: grp.date,
+					created: grp.created,
+					category: grp.category,
+					value: grp.measures[0].value,
+					type: grp.measures[0].type,
+					unit: grp.measures[0].unit,
+					createdAt: admin.firestore.FieldValue.serverTimestamp(),
+				})
+				.then((newData) => {
+					console.log("Document written with ID: ", newData);
+				})
+				.catch((error) => {
+					console.error("Error adding document: ", error);
+				});
+		});
+	}
 };
 
 // ##############################
-// // refreshToken
+// // refreshTokens
 // #############################
 
-async function refreshToken(){
+async function refreshTokens(tokenName){
+    const tokenNames = ["token", "d-token"];
+		for (let tokenName of tokenNames) {
+			await refreshToken(tokenName);
+		}
+};
+
+async function refreshToken(tokenName){
 		const currentToken = fireStore
-			.collection("token")
+			.collection(tokenName)
 			.orderBy("createdAt", "desc")
 			.limit(1);
 
@@ -196,7 +251,7 @@ async function refreshToken(){
 							functions.logger.info(response.body, { structuredData: true });
 							// firestoreへの保存
 							fireStore
-								.collection("token")
+								.collection(tokenName)
 								.add({
 									access_token: response.body.access_token,
 									refresh_token: response.body.refresh_token,
@@ -235,7 +290,7 @@ exports.fetch = functions.pubsub.schedule("every 30 minutes").onRun((context) =>
 
 exports.refresh = functions.pubsub.schedule("every 90 minutes").onRun((context) => {
 		functions.logger.info("refreshAccessToken", { structuredData: true });
-		refreshToken()
+		refreshTokens()
 			.then(() => {
 				return "OK";
 			})
