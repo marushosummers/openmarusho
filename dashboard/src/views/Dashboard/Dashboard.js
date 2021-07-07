@@ -47,6 +47,15 @@ export default function Dashboard() {
       .orderBy("date", "desc")
   );
 
+  // 友人体重: 7日間のデータを取得
+  const [dweightData, dweightloading, dweighterror] = useCollectionData(
+    firebase
+      .firestore()
+      .collection("d-weight")
+      .where("date", ">", Math.floor(UTC_NOW / 1000 - 60 * 60 * 24 * 7))
+      .orderBy("date", "desc")
+  );
+
   // 心拍数: 3時間のデータを取得
   const [hrData, hrloading, hrerror] = useCollectionData(
     firebase
@@ -72,6 +81,16 @@ export default function Dashboard() {
     return <div></div>;
   }
 
+  if (dweighterror) {
+    console.log(weighterror.message);
+  }
+  if (dweightloading) {
+    return <div></div>;
+  }
+  if (!dweightData) {
+    return <div></div>;
+  }
+
   if (hrerror) {
     console.log(hrerror.message);
   }
@@ -94,6 +113,7 @@ export default function Dashboard() {
 
   console.log(hrData);
   const weightChart = makeWeightChart(weightData);
+  const dweightChart = makeWeightChart(dweightData);
   const hrChart = makeHRChart(hrData);
   const activityChart = makeActivityChart(activityData);
 
@@ -253,6 +273,30 @@ export default function Dashboard() {
               <div className={classes.stats}>
                 <Update />
                 {activityChart.props.lastUpdated.toLocaleDateString()}
+              </div>
+            </CardFooter>
+          </Card>
+        </GridItem>
+      </GridContainer>
+      <GridContainer>
+        <GridItem xs={12} sm={12} md={4}>
+          <Card chart>
+            <CardHeader color="info">
+              <ChartistGraph
+                className="ct-chart"
+                data={dweightChart.data}
+                type="Line"
+                options={dweightChart.options}
+                listener={dweightChart.animation}
+              />
+            </CardHeader>
+            <CardBody>
+              <h4 className={classes.cardTitle}>Daijiro Weight</h4>
+            </CardBody>
+            <CardFooter chart>
+              <div className={classes.stats}>
+                <Update />
+                {weightChart.props.lastUpdated.toLocaleDateString()}
               </div>
             </CardFooter>
           </Card>
