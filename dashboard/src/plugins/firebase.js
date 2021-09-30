@@ -15,4 +15,9 @@ const config = {
 };
 
 firebase.initializeApp(config);
+firebase
+  .auth()
+  .signInAnonymously()
+  .catch((error) => console.log(error));
+
 export default firebase;

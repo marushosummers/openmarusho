@@ -6,6 +6,9 @@ admin.initializeApp(functions.config().firebase);
 
 // データベースの参照を作成
 var fireStore = admin.firestore()
+fireStore.settings({
+	ignoreUndefinedProperties: true
+})
 
 // localテスト時に設定
 // fireStore.settings({
