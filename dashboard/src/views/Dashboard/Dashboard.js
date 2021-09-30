@@ -75,40 +75,40 @@ export default function Dashboard() {
     console.log(weighterror.message);
   }
   if (weightloading) {
-    return <div></div>;
+    console.log("loading...");
   }
   if (!weightData) {
-    return <div></div>;
+    console.log("no data...");
   }
 
   if (dweighterror) {
     console.log(weighterror.message);
   }
   if (dweightloading) {
-    return <div></div>;
+    console.log("loading...");
   }
   if (!dweightData) {
-    return <div></div>;
+    console.log("no data...");
   }
 
   if (hrerror) {
     console.log(hrerror.message);
   }
   if (hrloading) {
-    return <div></div>;
+    console.log("loading...");
   }
   if (!hrData) {
-    return <div></div>;
+    console.log("no data...");
   }
 
   if (activityerror) {
     console.log(activityerror.message);
   }
   if (activityloading) {
-    return <div></div>;
+    console.log("loading...");
   }
   if (!activityData) {
-    return <div></div>;
+    console.log("no data...");
   }
 
   console.log(hrData);
@@ -165,7 +165,9 @@ export default function Dashboard() {
             <CardFooter stats>
               <div className={classes.stats}>
                 <Update />
-                {hrChart.props.lastUpdated.toLocaleString()}
+                {hrChart.props.lastUpdated
+                  ? hrChart.props.lastUpdated.toLocaleDateString()
+                  : "Stopping synchronization"}
               </div>
             </CardFooter>
           </Card>
@@ -184,7 +186,9 @@ export default function Dashboard() {
             <CardFooter stats>
               <div className={classes.stats}>
                 <AccessTime />
-                {hrChart.props.lastUpdated.toLocaleString()}
+                {hrChart.props.lastUpdated
+                  ? hrChart.props.lastUpdated.toLocaleDateString()
+                  : "Stopping synchronization"}
               </div>
             </CardFooter>
           </Card>
@@ -203,7 +207,9 @@ export default function Dashboard() {
             <CardFooter stats>
               <div className={classes.stats}>
                 <AccessTime />
-                {activityChart.props.lastUpdated.toLocaleDateString()}
+                {activityChart.props.lastUpdated
+                  ? activityChart.props.lastUpdated.toLocaleDateString()
+                  : "Stopping synchronization"}
               </div>
             </CardFooter>
           </Card>
@@ -227,7 +233,9 @@ export default function Dashboard() {
             <CardFooter chart>
               <div className={classes.stats}>
                 <Update />
-                {weightChart.props.lastUpdated.toLocaleDateString()}
+                {weightChart.props.lastUpdated
+                  ? weightChart.props.lastUpdated.toLocaleDateString()
+                  : "Stopping synchronization"}
               </div>
             </CardFooter>
           </Card>
@@ -249,7 +257,9 @@ export default function Dashboard() {
             <CardFooter chart>
               <div className={classes.stats}>
                 <Update />
-                {hrChart.props.lastUpdated.toLocaleString()}
+                {hrChart.props.lastUpdated
+                  ? hrChart.props.lastUpdated.toLocaleDateString()
+                  : "Stopping synchronization"}
               </div>
             </CardFooter>
           </Card>
@@ -272,7 +282,9 @@ export default function Dashboard() {
             <CardFooter chart>
               <div className={classes.stats}>
                 <Update />
-                {activityChart.props.lastUpdated.toLocaleDateString()}
+                {activityChart.props.lastUpdated
+                  ? activityChart.props.lastUpdated.toLocaleDateString()
+                  : "Stopping synchronization"}
               </div>
             </CardFooter>
           </Card>
@@ -296,7 +308,9 @@ export default function Dashboard() {
             <CardFooter chart>
               <div className={classes.stats}>
                 <Update />
-                {weightChart.props.lastUpdated.toLocaleDateString()}
+                {weightChart.props.lastUpdated
+                  ? weightChart.props.lastUpdated.toLocaleDateString()
+                  : "Stopping synchronization"}
               </div>
             </CardFooter>
           </Card>

@@ -29,33 +29,40 @@ const makeWeightChart = (dbData) => {
   const values = [];
   const times = [];
   const labels = [];
+  let maxValue;
+  let minValue;
+  let lastUpdatedValue;
+  let lastUpdated;
+  let transValue;
 
   // 配列に格納
-  dbData.forEach((data) => {
-    values.push(Math.round(data.value * 10 ** data.unit * 10) / 10);
-    times.push(convertDate(data.date));
-    _values.push({
-      x: convertDate(data.date),
-      y: Math.round(data.value * 10 ** data.unit * 10) / 10,
+  if (dbData) {
+    dbData.forEach((data) => {
+      values.push(Math.round(data.value * 10 ** data.unit * 10) / 10);
+      times.push(convertDate(data.date));
+      _values.push({
+        x: convertDate(data.date),
+        y: Math.round(data.value * 10 ** data.unit * 10) / 10,
+      });
     });
-  });
 
-  // 最大値を取得
-  const maxValue = values.reduce(getMax);
-  // 最小値を取得
-  const minValue = values.reduce(getMin);
-  // 配列の先頭の値を、最終の値として取得
-  const lastUpdatedValue = values[0];
-  // 配列の先頭の日時を、最終更新日時として取得
-  const lastUpdated = times[0];
-  // [0]と[1]の差分を取得
-  const transValue = Math.round((values[0] - values[1]) * 10) / 10;
-  console.log(values[0]);
+    // 最大値を取得
+    maxValue = values.reduce(getMax, 50);
+    // 最小値を取得
+    minValue = values.reduce(getMin, 50);
+    // 配列の先頭の値を、最終の値として取得
+    lastUpdatedValue = values[0];
+    // 配列の先頭の日時を、最終更新日時として取得
+    lastUpdated = times[0];
+    // [0]と[1]の差分を取得
+    transValue = Math.round((values[0] - values[1]) * 10) / 10;
+    console.log(values[0]);
 
-  // 配列に格納
-  times.forEach((time) => {
-    labels.push(time.getDate());
-  });
+    // 配列に格納
+    times.forEach((time) => {
+      labels.push(time.getDate());
+    });
+  }
 
   return {
     data: {
@@ -132,33 +139,40 @@ const makeHRChart = (dbData) => {
   const values = [];
   const times = [];
   const labels = [];
+  let maxValue;
+  let minValue;
+  let lastUpdatedValue;
+  let lastUpdated;
+  let transValue;
 
   // 配列に格納
-  dbData.forEach((data) => {
-    values.push(data.value);
-    times.push(convertDate(data.created));
-    _values.push({
-      x: convertDate(data.created),
-      y: data.value,
+  if (dbData) {
+    dbData.forEach((data) => {
+      values.push(data.value);
+      times.push(convertDate(data.created));
+      _values.push({
+        x: convertDate(data.created),
+        y: data.value,
+      });
     });
-  });
+
+    // 配列に格納
+    times.forEach((time) => {
+      labels.push(time.getDate());
+    });
+  }
 
   // TODO: データが無い時の値もここで定義しているため、見通しを良くしたい
   // 最大値を取得
-  const maxValue = values.length ? values.reduce(getMax) : 120;
+  maxValue = values.length ? values.reduce(getMax, 50) : 120;
   // 最小値を取得
-  const minValue = values.length ? values.reduce(getMin) : 50;
+  minValue = values.length ? values.reduce(getMin, 50) : 50;
   // 配列の先頭の値を、最終の値として取得
-  const lastUpdatedValue = values.length ? values[0] : "🤫";
+  lastUpdatedValue = values.length ? values[0] : "🤫";
   // 配列の先頭の日時を、最終更新日時として取得
-  const lastUpdated = times.length ? times[0] : "Stopping synchronization";
+  lastUpdated = times.length ? times[0] : undefined;
   // [0]と[1]の差分を取得
-  const transValue = Math.round((values[0] - values[1]) * 10) / 10;
-
-  // 配列に格納
-  times.forEach((time) => {
-    labels.push(time.getDate());
-  });
+  transValue = Math.round((values[0] - values[1]) * 10) / 10;
 
   return {
     data: {
@@ -235,33 +249,39 @@ const makeActivityChart = (dbData) => {
   const _values = [];
   const values = [];
   const times = [];
+  let maxValue;
+  let lastUpdatedValue;
+  let lastUpdated;
+  let transValue;
 
   // 配列に格納
-  dbData.forEach((data) => {
-    values.push(data.totalcalories);
-    times.push(new Date(data.date));
-    _values.push({
-      x: data.date,
-      y: data.totalcalories,
+  if (dbData) {
+    dbData.forEach((data) => {
+      values.push(data.totalcalories);
+      times.push(new Date(data.date));
+      _values.push({
+        x: data.date,
+        y: data.totalcalories,
+      });
     });
-  });
 
-  // 最大値を取得
-  const maxValue = values.reduce(getMax);
-  // 最小値を取得
-  // const minValue = values.reduce(getMin);
-  // 配列の先頭の値を、最終の値として取得
-  const lastUpdatedValue = values[0];
-  // 配列の先頭の日時を、最終更新日時として取得
-  const lastUpdated = times[0];
-  // [0]と[1]の差分を取得
-  const transValue = Math.round((values[0] - values[1]) * 10) / 10;
+    // 最大値を取得
+    maxValue = values.reduce(getMax, 50);
+    // 最小値を取得
+    // const minValue = values.reduce(getMin, 50);
+    // 配列の先頭の値を、最終の値として取得
+    lastUpdatedValue = values[0];
+    // 配列の先頭の日時を、最終更新日時として取得
+    lastUpdated = times[0];
+    // [0]と[1]の差分を取得
+    transValue = Math.round((values[0] - values[1]) * 10) / 10;
 
-  // // 配列に格納
-  // const labels = [];
-  // times.forEach((time) => {
-  //   labels.push(time.getDate());
-  // });
+    // // 配列に格納
+    // const labels = [];
+    // times.forEach((time) => {
+    //   labels.push(time.getDate());
+    // });
+  }
 
   return {
     data: {
