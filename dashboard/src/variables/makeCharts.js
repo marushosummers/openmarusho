@@ -47,9 +47,9 @@ const makeWeightChart = (dbData) => {
     });
 
     // 最大値を取得
-    maxValue = values.reduce(getMax, 50);
+    maxValue = values.length ? values.reduce(getMax) : 80;
     // 最小値を取得
-    minValue = values.reduce(getMin, 50);
+    minValue = values.length ? values.reduce(getMin) : 50;
     // 配列の先頭の値を、最終の値として取得
     lastUpdatedValue = values[0];
     // 配列の先頭の日時を、最終更新日時として取得
